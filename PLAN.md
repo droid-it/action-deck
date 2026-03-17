@@ -24,6 +24,7 @@ A localhost web app providing a customizable button grid to trigger actions on m
 | **Open/Close App** | Launch or quit an app | `open -a "AppName"` / `osascript -e 'tell application "AppName" to quit'` |
 | **Shell Command** | Run a terminal command | `child_process.exec(cmd, { shell: '/bin/zsh' })` |
 | **AppleScript** | Run arbitrary AppleScript | `osascript -e '...'` or `osascript file.scpt` |
+| **Open URL** | Open URL in default browser or trigger deeplinks | `open "https://..."` or `open "vscode://..."` |
 
 ### Profiles
 - Separate button layouts per context (e.g., "Coding", "Meetings", "DevOps")
@@ -150,7 +151,12 @@ interface AppleScriptAction {
   script: string              // inline AppleScript code
 }
 
-type Action = KeyboardMaestroAction | AppAction | ShellAction | AppleScriptAction
+interface OpenUrlAction {
+  type: 'open-url'
+  url: string                 // https://, vscode://, slack://, etc.
+}
+
+type Action = KeyboardMaestroAction | AppAction | ShellAction | AppleScriptAction | OpenUrlAction
 
 // === Layout ===
 
@@ -275,6 +281,14 @@ osascript -e 'tell application "Slack" to quit'
 exec(command, { cwd: workingDir, timeout, shell: '/bin/zsh' })
 ```
 
+### Open URL
+```bash
+open "https://github.com/pulls"           # default browser
+open "vscode://file/path/to/file"         # VS Code deeplink
+open "slack://channel?team=T123&id=C456"  # Slack deeplink
+open "raycast://extensions/..."           # Raycast deeplink
+```
+
 ### AppleScript
 ```bash
 osascript -e 'tell application "Finder" to empty trash'
@@ -297,7 +311,7 @@ osascript -e 'display notification "Done!" with title "Action Deck"'
 ### Phase 1 — MVP
 - Express server with config CRUD + action execution
 - Svelte button grid (5×3)
-- 4 action types working (KM, app, shell, AppleScript)
+- 5 action types working (KM, app, shell, AppleScript, open URL)
 - Button editor modal
 - Single profile, no folders
 - JSON config persistence
